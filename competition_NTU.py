@@ -19,4 +19,7 @@ for i in range(len_pollution):
 df=pd.DataFrame(data_pm25)
 #把NaN部分移除
 data_pm25=df.dropna(axis=0)
+#存檔
+df_1=pd.DataFrame(data_pm25)
+df_1.to_excel(r'D:\程式競賽\data_pm2_5.xlsx', index=False)
 # df_station=pd.read_csv(r'D:\程式競賽\station_ifo.csv')
