@@ -23,15 +23,25 @@ nox=[]
 for j in range((len(df))):
     if "x" not in df.iloc[j,:].values:
         nox.append(df.iloc[j,:])
+#%%把資料依照站名跟月份(由小到大排列)
 df_nox=pd.DataFrame(nox)
-#%%計算每一行的總和
-#先將計算範圍的數值轉換為整數
-num = df_nox.columns[8:]  # 轉換從第8列開始的數據為int
-df_nox[num] = df_nox[num].astype(int)
-sum_row = df_nox[num].sum(axis=1)
-df_nox["總和"]=sum_row
-df_nox=df_nox.sort_values(by='MonitorDate', ascending=True)#排序由1/1~12/31
-# #存檔(csv)
-# df_nox.to_csv(r'D:\程式競賽\data_pm2_5.csv', index=False, encoding='big5')
-
+df_nox = df_nox.sort_values(by=['SiteName', 'MonitorDate'], ascending=[True, True])
+#%%計算日平均
+num = df_nox.columns[8:]  # 轉換從第8列開始的數據為int(因為值從columns=8開始)
+df_nox[num] = df_nox[num].astype(int)# 原本是str用astype改變成int
+df_nox["日平均"]= df_nox[num].mean(axis=1)
+#%%計算月平均
+# 將MonitorDate列轉換為日期時間類型
+df_nox['MonitorDate'] = pd.to_datetime(df_nox['MonitorDate'])#先換成日期模式才能改
+df_nox['月份'] = df_nox['MonitorDate'].dt.strftime('%m')# 添加月份列
+#%%計算每月平均值
+monthly_avg = df_nox.groupby(['SiteName', '月份'])['日平均'].mean()#依循站名跟月份下去分類，並且對日平均那欄取平均
+df_monthly=pd.DataFrame(monthly_avg).rename(columns={'日平均':'月平均'})#改變column名字，從日平均變成月平均
+df_monthly = df_monthly.pivot_table(index='SiteName', columns='月份', values='月平均')# 使用 pivot_table 函數將每個月的平均值分成不同欄位
+# 將 pivot 後的資料框架重新命名欄位，加上 '月份'
+df_monthly = df_monthly.add_prefix('月份')
+df_monthly=df_monthly.reset_index()#用reset存下index的值   
+#%%存檔(csv)
+df_nox.to_csv(r'D:\程式競賽\data_pm2_5.csv', index=False, encoding='big5')
+df_monthly.to_csv(r'D:\程式競賽\pm2_5_monthly.csv', index=False, encoding='big5')
 
