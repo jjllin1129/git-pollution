@@ -35,7 +35,7 @@ df_nox = df_nox.sort_values(by=['SiteName', 'MonitorDate'], ascending=[True, Tru
 num = df_nox.columns[8:-2]  # 轉換從第8列開始的數據為int(因為值從columns=8開始)
 df_nox[num] = df_nox[num].astype(int)# 原本是str用astype改變成int
 df_nox["日平均"]= df_nox[num].mean(axis=1)
-#%%計算月平均
+#%%計算年and月平均前置作業
 # 將MonitorDate列轉換為日期時間類型
 df_nox['MonitorDate'] = pd.to_datetime(df_nox['MonitorDate'])#先換成日期模式才能改
 df_nox['月份'] = df_nox['MonitorDate'].dt.strftime('%m')# 添加月份列
@@ -45,9 +45,12 @@ df_monthly=pd.DataFrame(monthly_avg).rename(columns={'日平均':'月平均'})#�
 df_monthly = df_monthly.pivot_table(index=['SiteName','Area','County'], columns='月份', values='月平均')# 使用 pivot_table 函數將每個月的平均值分成不同欄位
 # 將 pivot 後的資料框架重新命名欄位，加上 '月份'
 df_monthly = df_monthly.add_prefix('月份')
-df_monthly=df_monthly.reset_index()#用reset存下index的值   
-
+df_monthly=df_monthly.reset_index()#用reset存下index的值
+#%%計算每年平均值
+yearly_avg = df_monthly.iloc[:,3:].mean(axis=1)
+df_yearly=df_monthly[['Area','County','SiteName']]
+df_yearly.loc[:, '年平均'] = yearly_avg
 #%%存檔(csv)
 # df_nox.to_csv(r'D:\程式競賽\data_pm2_5.csv', index=False, encoding='big5')
 df_monthly.to_csv(r'D:\程式競賽\pm2_5_monthly.csv', index=False, encoding='big5')
-
+df_yearly.to_csv(r'D:\程式競賽\pm2_5_yearly.csv', index=False, encoding='big5')
