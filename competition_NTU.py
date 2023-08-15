@@ -48,8 +48,9 @@ df_monthly = df_monthly.add_prefix('月份')
 df_monthly=df_monthly.reset_index()#用reset存下index的值
 #%%計算每年平均值
 yearly_avg = df_monthly.iloc[:,3:].mean(axis=1)
-df_yearly=df_monthly[['Area','County','SiteName']]
-df_yearly.loc[:, '年平均'] = yearly_avg
+# df_yearly=df_monthly[['Area','County','SiteName']]
+# df_yearly.loc[:,'年平均']=yearly_avg
+df_yearly = df_monthly[['Area','County','SiteName']].assign(年平均=yearly_avg)#用assig()來取代上面的方法
 #%%存檔(csv)
 # df_nox.to_csv(r'D:\程式競賽\data_pm2_5.csv', index=False, encoding='big5')
 df_monthly.to_csv(r'D:\程式競賽\pm2_5_monthly.csv', index=False, encoding='big5')
