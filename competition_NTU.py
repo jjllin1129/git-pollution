@@ -10,6 +10,11 @@ import pandas as pd
 """
 #%%讀取資料
 df_pollution = pd.read_csv(r'D:\程式競賽\pollution_data_1.csv',encoding = 'big5')
+df_station=pd.read_csv(r'D:\程式競賽\station_ifo.csv')
+#%%把縣市等資料合併到汙染的資料中
+merged_df = df_pollution.merge(df_station[['StationName', 'Area', 'County']], left_on='SiteName', right_on='StationName', how='left')
+merged_df=merged_df[['Area', 'County']]
+df_pollution[['Area', 'County']]=merged_df
 #%%取PM2.5資料
 data_pm25=[]
 for i in range(len(df_pollution)):
@@ -27,7 +32,7 @@ for j in range((len(df))):
 df_nox=pd.DataFrame(nox)
 df_nox = df_nox.sort_values(by=['SiteName', 'MonitorDate'], ascending=[True, True])
 #%%計算日平均
-num = df_nox.columns[8:]  # 轉換從第8列開始的數據為int(因為值從columns=8開始)
+num = df_nox.columns[8:-2]  # 轉換從第8列開始的數據為int(因為值從columns=8開始)
 df_nox[num] = df_nox[num].astype(int)# 原本是str用astype改變成int
 df_nox["日平均"]= df_nox[num].mean(axis=1)
 #%%計算月平均
@@ -35,13 +40,14 @@ df_nox["日平均"]= df_nox[num].mean(axis=1)
 df_nox['MonitorDate'] = pd.to_datetime(df_nox['MonitorDate'])#先換成日期模式才能改
 df_nox['月份'] = df_nox['MonitorDate'].dt.strftime('%m')# 添加月份列
 #%%計算每月平均值
-monthly_avg = df_nox.groupby(['SiteName', '月份'])['日平均'].mean()#依循站名跟月份下去分類，並且對日平均那欄取平均
+monthly_avg = df_nox.groupby(['Area','County','SiteName', '月份'])['日平均'].mean()#依循站名跟月份下去分類，並且對日平均那欄取平均
 df_monthly=pd.DataFrame(monthly_avg).rename(columns={'日平均':'月平均'})#改變column名字，從日平均變成月平均
-df_monthly = df_monthly.pivot_table(index='SiteName', columns='月份', values='月平均')# 使用 pivot_table 函數將每個月的平均值分成不同欄位
+df_monthly = df_monthly.pivot_table(index=['SiteName','Area','County'], columns='月份', values='月平均')# 使用 pivot_table 函數將每個月的平均值分成不同欄位
 # 將 pivot 後的資料框架重新命名欄位，加上 '月份'
 df_monthly = df_monthly.add_prefix('月份')
 df_monthly=df_monthly.reset_index()#用reset存下index的值   
+
 #%%存檔(csv)
-df_nox.to_csv(r'D:\程式競賽\data_pm2_5.csv', index=False, encoding='big5')
+# df_nox.to_csv(r'D:\程式競賽\data_pm2_5.csv', index=False, encoding='big5')
 df_monthly.to_csv(r'D:\程式競賽\pm2_5_monthly.csv', index=False, encoding='big5')
 
