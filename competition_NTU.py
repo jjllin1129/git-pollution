@@ -23,11 +23,12 @@ for i in range(len(df_pollution)):
 df=pd.DataFrame(data_pm25)
 #把NaN部分移除
 df=df.dropna(axis=0)
-#把x部分移除
+#把x及外島部分移除
 nox=[]
 for j in range((len(df))):
     if "x" not in df.iloc[j,:].values:
-        nox.append(df.iloc[j,:])
+        if "外島" not in df.iloc[j,-2]:
+            nox.append(df.iloc[j,:])
 #%%把資料依照站名跟月份(由小到大排列)
 df_nox=pd.DataFrame(nox)
 df_nox = df_nox.sort_values(by=['SiteName', 'MonitorDate'], ascending=[True, True])
