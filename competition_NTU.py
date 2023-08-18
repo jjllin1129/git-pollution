@@ -43,16 +43,22 @@ df_nox['月份'] = df_nox['MonitorDate'].dt.strftime('%m')# 添加月份列
 #%%計算每月平均值
 monthly_avg = df_nox.groupby(['Area','County','SiteName', '月份'])['日平均'].mean()#依循站名跟月份下去分類，並且對日平均那欄取平均
 df_monthly=pd.DataFrame(monthly_avg).rename(columns={'日平均':'月平均'})#改變column名字，從日平均變成月平均
-df_monthly = df_monthly.pivot_table(index=['SiteName','Area','County'], columns='月份', values='月平均')# 使用 pivot_table 函數將每個月的平均值分成不同欄位
+df_monthly = df_monthly.pivot_table(index=['Area','County','SiteName'], columns='月份', values='月平均')# 使用 pivot_table 函數將每個月的平均值分成不同欄位
 # 將 pivot 後的資料框架重新命名欄位，加上 '月份'
 df_monthly = df_monthly.add_prefix('月份')
-df_monthly=df_monthly.reset_index()#用reset存下index的值
+df_monthly=df_monthly.reset_index().round(3)#用reset存下index的值
 #%%計算每年平均值
 yearly_avg = df_monthly.iloc[:,3:].mean(axis=1)
 # df_yearly=df_monthly[['Area','County','SiteName']]
 # df_yearly.loc[:,'年平均']=yearly_avg
-df_yearly = df_monthly[['Area','County','SiteName']].assign(年平均=yearly_avg)#用assig()來取代上面的方法
+df_yearly = df_monthly[['Area','County','SiteName']].assign(年平均=yearly_avg).round(3)#用assig()來取代上面的方法
+#%% C#IDW要用的資料
+# merged_IDW = df_yearly.merge(df_station[['StationName', 'TWD97_TM2_X', 'TWD97_TM2_Y']], left_on='SiteName', right_on='StationName', how='left')
+# merged_IDW=merged_IDW[['TWD97_TM2_X', 'TWD97_TM2_Y','年平均']]
+# df_IDW=pd.DataFrame(merged_IDW)
+# df_IDW.columns=[["X", "Y", "PollutionValue"]]
 #%%存檔(csv)
 # df_nox.to_csv(r'D:\程式競賽\data_pm2_5.csv', index=False, encoding='big5')
-df_monthly.to_csv(r'D:\程式競賽\pm2_5_monthly.csv', index=False, encoding='big5')
-df_yearly.to_csv(r'D:\程式競賽\pm2_5_yearly.csv', index=False, encoding='big5')
+df_monthly.to_csv(r'D:\程式競賽\final_C#\0817\bin\Debug\pm2_5_monthly.csv', index=False, encoding='big5')
+df_yearly.to_csv(r'D:\程式競賽\final_C#\0817\bin\Debug\pm2_5_yearly.csv', index=False, encoding='big5')
+# # df_IDW.to_csv(r'C:\Users\USER\source\repos\0817\0817\bin\Debug\C#IDWdata.csv', index=False, encoding='big5')
