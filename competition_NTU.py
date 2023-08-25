@@ -52,16 +52,15 @@ yearly_avg = df_monthly.iloc[:,3:].mean(axis=1)
 # df_yearly=df_monthly[['Area','County','SiteName']]
 # df_yearly.loc[:,'年平均']=yearly_avg
 df_yearly = df_monthly[['Area','County','SiteName']].assign(年平均=yearly_avg).round(3)#用assig()來取代上面的方法
-#%% C#IDW要用的資料(year)
+#%% C#IDW要用的資料(年平均)
 merged_IDW = df_yearly.merge(df_station[['StationName', 'lon', 'lat']], left_on='SiteName', right_on='StationName', how='left')
 merged_IDW=merged_IDW[['lon', 'lat','年平均']]
 df_IDW=pd.DataFrame(merged_IDW)
 df_IDW.columns=[["X", "Y", "PollutionValue"]]
-#%%#%% C#IDW要用的資料(month)
-# merged_IDW_month = df_monthly.merge(df_station[['StationName', 'lon', 'lat']], left_on='SiteName', right_on='StationName', how='left')
-# merged_IDW=merged_IDW[['lon', 'lat','年平均']]
-# df_IDW=pd.DataFrame(merged_IDW)
-# df_IDW.columns=[["X", "Y", "PollutionValue"]]
+#%% C#IDW要用的資料(月平均)
+merged_IDW_month = df_monthly.merge(df_station[['StationName', 'lon', 'lat']], left_on='SiteName', right_on='StationName', how='left')
+df_IDW_month = merged_IDW_month.iloc[:, -2:].join(merged_IDW_month.iloc[:, 3:15])
+
 #%%測站更新檔案
 #把NULL及外島部分移除
 station_new_data=[]
@@ -73,7 +72,8 @@ df_station_new=pd.DataFrame(station_new_data)
 df_station_new=df_station_new.dropna(axis=0)
 #%%存檔(csv)
 # df_nox.to_csv(r'D:\程式競賽\data_pm2_5.csv', index=False, encoding='big5')
-df_monthly.to_csv(r'D:\程式競賽\git-pollution\pm2_5_monthly.csv', index=False, encoding='big5')
-df_yearly.to_csv(r'D:\程式競賽\git-pollution\pm2_5_yearly.csv', index=False, encoding='big5')
-df_IDW.to_csv(r'D:\程式競賽\git-pollution\C#IDWdata_yearly.csv', index=False, encoding='big5')
-df_station_new.to_csv(r'D:\程式競賽\git-pollution\station_new.csv', index=False, encoding='big5')
+df_monthly.to_csv(r'D:\程式競賽\python檔案\數據檔案\pm2_5_monthly.csv', index=False, encoding='big5')
+df_yearly.to_csv(r'D:\程式競賽\python檔案\數據檔案\pm2_5_yearly.csv', index=False, encoding='big5')
+df_IDW.to_csv(r'D:\程式競賽\python檔案\數據檔案\C#IDWdata.csv', index=False, encoding='big5')
+df_station_new.to_csv(r'D:\程式競賽\python檔案\數據檔案\station_new.csv', index=False, encoding='big5')
+df_IDW_month.to_csv(r'D:\程式競賽\python檔案\數據檔案\IDW_monthly.csv', index=False, encoding='big5')
